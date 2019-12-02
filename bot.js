@@ -22,13 +22,14 @@ client.on('message', msg => {
   if(msg.content.indexOf(`<@${client.user.id}>`) !== 0) return;
 
   const args = msg.content.split(/\s+/g);
+  let command = '';
 
   //if you pinged the bot with no command, use the 'help' command
   if (typeof args[1] === 'undefined') {
-    const command = 'help';
+    command = 'help';
   }
   else {
-    const command = args[1].toLowerCase();
+    command = args[1].toLowerCase();
   }
 
   //commands:
