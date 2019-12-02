@@ -1,22 +1,44 @@
 const Discord = require('discord.js');
 
 const client = new Discord.Client();
+const channel_id = '651141135141699586';
 
  
 
 client.on('ready', () => {
 
-    console.log('I am ready!');
+    console.log('Ready to collect wisdom!');
+    client.user.setActivity('ping me for help');
 
 });
 
  
 
-client.on('message', message => {
-  if (message.author.bot) return;
+client.on('message', msg => {
+  //ignore bots including self:
+  if (msg.author.bot) return;
 
-  message.reply('I am bot');
+  //pinging the bot is the trigger here
+  if(msg.content.indexOf(`<@${client.user.id}>`) !== 0) return;
 
+  const args = msg.content.split(/\s+/g);
+
+  //if you pinged the bot with no command, use the 'help' command
+  if (typeof args[1] === 'undefined') {
+    const command = 'help';
+  }
+  else {
+    const command = args[1].toLowerCase();
+  }
+
+  //commands:
+  if (command === 'help') {
+    msg.channel.send('This is a starboard bot');
+  }
+  //other commands go here...
+  else {
+    msg.channel.send('unknown command');
+  }
 
 });
 
