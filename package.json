@@ -1,25 +1,25 @@
 {
-
-  "name": "Wisdom Collector",
-
-  "description": "Starboard and post archiving bot",
-
-  "version": "0.0.0",
-
+  "name": "uwu-bot",
+  "version": "1.0.0",
+  "description": "",
   "main": "bot.js",
-
-  "scripts": {
-
-    "start": "node bot.js"
-
-  },
-
   "dependencies": {
-
-    "discord.js": "11.1.0",
-
-    "request": "2.81.0"
-
-  }
-
+    "discord": "^0.8.2",
+    "discord.js": "^11.5.1"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mythiccriminal/uwu-bot.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/mythiccriminal/uwu-bot/issues"
+  },
+  "homepage": "https://github.com/mythiccriminal/uwu-bot#readme"
 }
