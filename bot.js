@@ -13,8 +13,9 @@ client.on('ready', () => {
  
 
 client.on('message', message => {
+  if (msg.author.bot) return;
 
-       message.reply('I am bot');
+  message.reply('I am bot');
 
 
 });
