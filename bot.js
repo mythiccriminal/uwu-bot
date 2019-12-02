@@ -43,6 +43,52 @@ client.on('message', msg => {
 
 });
 
+const events = {
+  MESSAGE_REACTION_ADD: 'messageReactionAddCust',
+  MESSAGE_REACTION_REMOVE: 'messageReactionRemoveCust',
+};
+
+client.on('raw', async event => {
+  //console.log('\nRaw event data:\n', event);
+
+  //events I care about have event.t = MESSAGE_REACTION_ADD or MESSAGE_REACTION_REMOVE. ignore everything else.
+  if (!(event.t in events)) return;
+
+  //save raw event data
+  const data = event.d;
+  const user = await client.users.get(data.user_id);
+
+  //if the user is a bot, ignore it (ignore self)
+  if(user.bot) return;
+
+  let channel = await client.channels.get(data.channel_id);
+  let message = await channel.fetchMessage(data.message_id);
+  let emojiKey = (data.emoji.id) ? `${data.emoji.name}:${data.emoji.id}` : data.emoji.name;
+  let reaction = await message.reactions.get(emojiKey);
+
+  //if reaction is undefined because the reaction was just removed, build it from scratch (this applies to MESSAGE_REACTION_REMOVE events)
+  if (!reaction) {
+    // Create an object that can be passed through the event like normal
+    const emoji = new Discord.Emoji(client.guilds.get(data.guild_id), data.emoji);
+    reaction = new Discord.MessageReaction(message, emoji, 1, data.user_id === client.user.id);
+  }
+
+  //emit an event:
+  client.emit(events[event.t], reaction, user);
+});
+
+client.on('messageReactionAddCust', async (reaction, user) => {
+  
+  //const user = reaction.message.author;
+  const channel = reaction.message.channel;
+
+  //pin
+  if (reaction.emoji.toString() === '📌' || reaction.emoji.toString() === '⭐') {
+    channel.send('I saw a star');
+    
+  }
+});
+
  
 
 // THIS  MUST  BE  THIS  WAY
