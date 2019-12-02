@@ -1,4 +1,3 @@
-const auth = require('./auth.json');
 const Discord = require('discord.js');
 
 const client = new Discord.Client();
