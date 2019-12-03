@@ -2,17 +2,12 @@ const Discord = require('discord.js');
 
 const client = new Discord.Client();
 const star_channel_id = '651141135141699586';
-//const starChannel = client.channels.get(star_channel_id)
 
  
 
 client.on('ready', () => {
-  const starChannel = client.channels.get(star_channel_id)
-
   console.log('Ready to collect wisdom!');
   client.user.setActivity('ping me for help');
-  starChannel.send('testing channel');
-
 });
 
  
@@ -83,6 +78,7 @@ client.on('raw', async event => {
 client.on('messageReactionAddCust', async (reaction, user) => {
 //                                        (reaction on the message, user who reacted)
   const message = reaction.message;
+  const starChannel = client.channels.get(star_channel_id);
 
   //don't allow starring bot messages
   if(message.author.bot) return;
