@@ -162,6 +162,7 @@ client.on('messageReactionAddCust', async (reaction, user) => {
   const fetchedMessages = await starChannel.fetchMessages();
   const alreadyStarredMessage = fetchedMessages.find(m => m.embeds[0] && m.embeds[0].footer && m.embeds[0].footer.text.endsWith(message.id));
   const embed = buildEmbed(message);
+  console.log(embed);
   if(alreadyStarredMessage) {
     message.channel.send(`message is already starred here: ${alreadyStarredMessage.url}`);
     //edit the embed
