@@ -146,6 +146,7 @@ client.on('messageReactionAddCust', async (reaction, user) => {
   if(message.channel.id === star_channel_id) return;
 
   //only continue if the message has the necessary number of stars
+  message.channel.send(`starcount: ${getStarCount(message)}`);
   if(getStarCount(message) < min_emojis) return;
 
   //scan starboard to see if message already exists there
