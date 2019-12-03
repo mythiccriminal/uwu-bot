@@ -48,18 +48,27 @@ async function buildEmbed(message) {
   // If the message is empty, return undefined
   if (image === '' && message.cleanContent.length < 1) return false;
 
-  const embed = new Discord.RichEmbed()
-    .setColor(15844367)
+  const embed = {
+    color: 15844367,
     // Here we use cleanContent, which replaces all mentions in the message with their
     // equivalent text. For example, an @everyone ping will just display as @everyone, without tagging you!
     // At the date of this edit (09/06/18) embeds do not mention yet.
     // But nothing is stopping Discord from enabling mentions from embeds in a future update.
-    .setDescription(message.cleanContent) 
-    .setAuthor(message.author.tag, message.author.displayAvatarURL)
-    .addField('Original', `[Jump to Message](${message.url})`)
-    .setFooter(`${getEmojiString(message)} | ${message.id}`)
-    .setTimestamp(new Date())
-    .setImage(image);
+    description: message.cleanContent,
+    author: {
+      name: message.author.tag, 
+      url: message.author.displayAvatarURL
+    },
+    fields: [
+      {
+        name: 'Original',
+        value: `[Jump to Message](${message.url})`
+      }
+    ],
+    footer: `${getEmojiString(message)} | ${message.id}`,
+    timestamp: new Date(),
+    image: image
+  };
 
   return embed;
 }
