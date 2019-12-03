@@ -161,7 +161,7 @@ client.on('messageReactionAddCust', async (reaction, user) => {
   //scan starboard to see if message already exists there
   const fetchedMessages = await starChannel.fetchMessages();
   const alreadyStarredMessage = fetchedMessages.find(m => m.embeds[0] && m.embeds[0].footer && m.embeds[0].footer.text.endsWith(message.id));
-  const embed = buildEmbed(message);
+  const embed = await buildEmbed(message);
   console.log(embed);
   if(alreadyStarredMessage) {
     message.channel.send(`message is already starred here: ${alreadyStarredMessage.url}`);
