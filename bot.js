@@ -1,7 +1,8 @@
 const Discord = require('discord.js');
 
 const client = new Discord.Client();
-const channel_id = '651141135141699586';
+const star_channel_id = '651141135141699586';
+const starChannel = client.channels.get(star_channel_id)
 
  
 
@@ -78,15 +79,40 @@ client.on('raw', async event => {
 });
 
 client.on('messageReactionAddCust', async (reaction, user) => {
-  
-  //const user = reaction.message.author;
-  const channel = reaction.message.channel;
+//                                        (reaction on the message, user who reacted)
+  const message = reaction.message;
 
-  //pin
-  if (reaction.emoji.toString() === '📌' || reaction.emoji.toString() === '⭐') {
-    channel.send('I saw a star');
-    
+  //don't allow starring bot messages
+  if(message.author.bot) return;
+
+  if (reaction.emoji.toString() !== '📌' && reaction.emoji.toString() !== '⭐') return;
+
+  //scan starboard to see if message already exists there
+  const fetchedMessages = await starChannel.fetchMessages();
+  const alreadyStarredMessage = fetchedMessages.find(m => m.id === message.id);
+  if(alreadyStarredMessage) {
+    message.channel.send(`message with id ${alreadyStarredMessage.id} is already starred`);
+    //maybe edit embed here?
   }
+  else {
+    //add message to starboard
+      const image = message.attachments.size > 0 ? await this.extension(reaction, message.attachments.array()[0].url) : ''; 
+    // If the message is empty, we don't allow the user to star the message.
+    if (image === '' && message.cleanContent.length < 1) return;
+    const embed = new RichEmbed()
+      .setColor(15844367)
+      // Here we use cleanContent, which replaces all mentions in the message with their
+      // equivalent text. For example, an @everyone ping will just display as @everyone, without tagging you!
+      // At the date of this edit (09/06/18) embeds do not mention yet.
+      // But nothing is stopping Discord from enabling mentions from embeds in a future update.
+      .setDescription(message.cleanContent) 
+      .setAuthor(message.author.tag, message.author.displayAvatarURL)
+      .setTimestamp(new Date())
+      .setImage(image);
+    await starChannel.send({ embed });
+  }
+
+    
 });
 
  
