@@ -95,14 +95,14 @@ client.on('messageReactionAddCust', async (reaction, user) => {
 
   //scan starboard to see if message already exists there
   const fetchedMessages = await starChannel.fetchMessages();
-  const alreadyStarredMessage = fetchedMessages.find(m => m.id === message.id);
+  const alreadyStarredMessage = fetchedMessages.find(m => m.embeds[0].footer.text.endsWith(message.id));
   if(alreadyStarredMessage) {
     message.channel.send(`message with id ${alreadyStarredMessage.id} is already starred`);
     //maybe edit embed here?
   }
   else {
     //add message to starboard
-    const image = message.attachments.size > 0 ? await getImageAttachment(message.attachments.array()[0].url) : ''; 
+    const image = message.attachments.size > 0 ? await getImageAttachment(message.attachments.array()[0].url) : '';
     // If the message is empty, we don't allow the user to star the message.
     if (image === '' && message.cleanContent.length < 1) return;
     const embed = new Discord.RichEmbed()
@@ -111,8 +111,10 @@ client.on('messageReactionAddCust', async (reaction, user) => {
       // equivalent text. For example, an @everyone ping will just display as @everyone, without tagging you!
       // At the date of this edit (09/06/18) embeds do not mention yet.
       // But nothing is stopping Discord from enabling mentions from embeds in a future update.
-      .setDescription(message.content) 
+      .setDescription(message.cleanContent) 
       .setAuthor(message.author.tag, message.author.displayAvatarURL)
+      .addField('Original', `[Link](${message.url})`)
+      .setFooter(`⭐ 1 | ${message.id}`)
       .setTimestamp(new Date())
       .setImage(image);
     await starChannel.send({ embed });
