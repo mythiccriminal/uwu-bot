@@ -111,7 +111,7 @@ client.on('messageReactionAddCust', async (reaction, user) => {
       // equivalent text. For example, an @everyone ping will just display as @everyone, without tagging you!
       // At the date of this edit (09/06/18) embeds do not mention yet.
       // But nothing is stopping Discord from enabling mentions from embeds in a future update.
-      .setDescription(message.cleanContent) 
+      .setDescription(message.content) 
       .setAuthor(message.author.tag, message.author.displayAvatarURL)
       .setTimestamp(new Date())
       .setImage(image);
