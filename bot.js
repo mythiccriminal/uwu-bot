@@ -63,10 +63,14 @@ async function buildEmbed(message) {
       {
         name: 'Original',
         value: `[Jump to Message](${message.url})`
+      },
+      {
+        name: 'Reacts',
+        value: getEmojiString(message)
       }
     ],
     footer: {
-      text:`${getEmojiString(message)} | ${message.id}`
+      text: message.id
     },
     timestamp: new Date(),
     image: {
