@@ -95,7 +95,7 @@ client.on('messageReactionAddCust', async (reaction, user) => {
 
   //scan starboard to see if message already exists there
   const fetchedMessages = await starChannel.fetchMessages();
-  const alreadyStarredMessage = fetchedMessages.find(m => m.embeds && m.embeds[0].footer && m.embeds[0].footer.text.endsWith(message.id));
+  const alreadyStarredMessage = fetchedMessages.find(m => m.embeds[0] && m.embeds[0].footer && m.embeds[0].footer.text.endsWith(message.id));
   if(alreadyStarredMessage) {
     message.channel.send(`message is already starred here: ${alreadyStarredMessage.url}`);
     //maybe edit embed here?
