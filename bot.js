@@ -57,7 +57,7 @@ async function buildEmbed(message) {
     description: message.cleanContent,
     author: {
       name: message.author.tag, 
-      url: message.author.displayAvatarURL
+      icon_url: message.author.displayAvatarURL
     },
     fields: [
       {
@@ -65,9 +65,13 @@ async function buildEmbed(message) {
         value: `[Jump to Message](${message.url})`
       }
     ],
-    footer: `${getEmojiString(message)} | ${message.id}`,
+    footer: {
+      text:`${getEmojiString(message)} | ${message.id}`
+    },
     timestamp: new Date(),
-    image: image
+    image: {
+      url: image
+    }
   };
 
   return embed;
