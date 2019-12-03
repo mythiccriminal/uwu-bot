@@ -37,6 +37,8 @@ function getStarCount(message) {
   message.reactions.forEach(reaction => {
     if (reaction.emoji.toString === '⭐') {// || or pin?
       star_count += reaction.count;
+      message.channel.send(`fn starcount: ${star_count}`);
+
     }
   })
   return star_count;
