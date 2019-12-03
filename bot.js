@@ -3,6 +3,14 @@ const Discord = require('discord.js');
 const client = new Discord.Client();
 const star_channel_id = '651141135141699586';
 
+//check a message attachment. if it's an image, return the attachment, otherwise return ''
+function getImageAttachment(attachment) {
+  const imageLink = attachment.split('.');
+  const typeOfImage = imageLink[imageLink.length - 1];
+  const image = /(jpg|jpeg|png|gif)/gi.test(typeOfImage);
+  if (!image) return '';
+  return attachment;
+}
  
 
 client.on('ready', () => {
@@ -94,7 +102,7 @@ client.on('messageReactionAddCust', async (reaction, user) => {
   }
   else {
     //add message to starboard
-      const image = message.attachments.size > 0 ? await this.extension(reaction, message.attachments.array()[0].url) : ''; 
+    const image = message.attachments.size > 0 ? await getImageAttachment(message.attachments.array()[0].url) : ''; 
     // If the message is empty, we don't allow the user to star the message.
     if (image === '' && message.cleanContent.length < 1) return;
     const embed = new Discord.RichEmbed()
