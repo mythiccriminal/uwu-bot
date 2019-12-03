@@ -11,6 +11,15 @@ function getImageAttachment(attachment) {
   if (!image) return '';
   return attachment;
 }
+
+//for a message, return a string representation of the emoji reactions
+function getEmojiString(message) {
+  let emoji_string = ''
+  message.reactions.forEach(reaction => {
+    emoji_string += reaction.emoji.name + ' ' + reaction.emoji.count + ' ';
+  })
+  return emoji_string;
+}
  
 
 client.on('ready', () => {
@@ -88,9 +97,16 @@ client.on('messageReactionAddCust', async (reaction, user) => {
   const message = reaction.message;
   const starChannel = client.channels.get(star_channel_id);
 
+  message.channel.send(getEmojiString(message));
+
   //don't allow starring bot messages
   if(message.author.bot) return;
 
+  //don't allow starring messages in the starboard channel
+  if(message.channel.id === star_channel_id) return;
+
+  //only consider these emoji:
+  //(really what I need to check here is if the message already has one of these emoji reacts)
   if (reaction.emoji.toString() !== '📌' && reaction.emoji.toString() !== '⭐') return;
 
   //scan starboard to see if message already exists there
@@ -113,7 +129,7 @@ client.on('messageReactionAddCust', async (reaction, user) => {
       // But nothing is stopping Discord from enabling mentions from embeds in a future update.
       .setDescription(message.cleanContent) 
       .setAuthor(message.author.tag, message.author.displayAvatarURL)
-      .addField('Original', `[Link](${message.url})`)
+      .addField('Original', `[Jump to Message](${message.url})`)
       .setFooter(`⭐ 1 | ${message.id}`)
       .setTimestamp(new Date())
       .setImage(image);
