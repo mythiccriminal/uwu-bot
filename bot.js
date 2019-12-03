@@ -24,7 +24,7 @@ function getEmojiString(message) {
 
 //return the total number of reactions on a message
 function getEmojiCount(message) {
-  let emoji_count = 0
+  let emoji_count = 0;
   message.reactions.forEach(reaction => {
     emoji_count += reaction.count;
   })
@@ -33,7 +33,7 @@ function getEmojiCount(message) {
 
 //return the total number of star reactions on a message
 function getStarCount(message) {
-  let star_count = 0
+  let star_count = 0;
   message.reactions.forEach(reaction => {
     if (reaction.emoji.toString === '⭐') {// || or pin?
       star_count += reaction.count;
@@ -43,7 +43,7 @@ function getStarCount(message) {
 }
 
 //return a RichEmbed object based on the message, or return false if message is empty
-function buildEmbed(message) {
+async function buildEmbed(message) {
   const image = message.attachments.size > 0 ? await getImageAttachment(message.attachments.array()[0].url) : '';
   // If the message is empty, return undefined
   if (image === '' && message.cleanContent.length < 1) return false;
