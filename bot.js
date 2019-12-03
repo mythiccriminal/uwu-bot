@@ -2,6 +2,7 @@ const Discord = require('discord.js');
 
 const client = new Discord.Client();
 const star_channel_id = '651141135141699586';
+const min_emojis = 1;
 
 //check a message attachment. if it's an image, return the attachment, otherwise return ''
 function getImageAttachment(attachment) {
@@ -12,13 +13,55 @@ function getImageAttachment(attachment) {
   return attachment;
 }
 
-//for a message, return a string representation of the emoji reactions
+//return a string representation of the emoji reactions on a message
 function getEmojiString(message) {
   let emoji_string = ''
   message.reactions.forEach(reaction => {
-    emoji_string += reaction.emoji.toString() + ' ' + reaction.count + ' ';
+    emoji_string += reaction.emoji.toString() + ' ' + reaction.count + '  ';
   })
   return emoji_string;
+}
+
+//return the total number of reactions on a message
+function getEmojiCount(message) {
+  let emoji_count = 0
+  message.reactions.forEach(reaction => {
+    emoji_count += reaction.count;
+  })
+  return emoji_count;
+}
+
+//return the total number of star reactions on a message
+function getStarCount(message) {
+  let star_count = 0
+  message.reactions.forEach(reaction => {
+    if (reaction.emoji.toString === '⭐') {// || or pin?
+      star_count += reaction.count;
+    }
+  })
+  return star_count;
+}
+
+//return a RichEmbed object based on the message, or return false if message is empty
+function buildEmbed(message) {
+  const image = message.attachments.size > 0 ? await getImageAttachment(message.attachments.array()[0].url) : '';
+  // If the message is empty, return undefined
+  if (image === '' && message.cleanContent.length < 1) return false;
+
+  const embed = new Discord.RichEmbed()
+    .setColor(15844367)
+    // Here we use cleanContent, which replaces all mentions in the message with their
+    // equivalent text. For example, an @everyone ping will just display as @everyone, without tagging you!
+    // At the date of this edit (09/06/18) embeds do not mention yet.
+    // But nothing is stopping Discord from enabling mentions from embeds in a future update.
+    .setDescription(message.cleanContent) 
+    .setAuthor(message.author.tag, message.author.displayAvatarURL)
+    .addField('Original', `[Jump to Message](${message.url})`)
+    .setFooter(`${getEmojiString(message)} | ${message.id}`)
+    .setTimestamp(new Date())
+    .setImage(image);
+
+  return embed;
 }
  
 
@@ -27,7 +70,6 @@ client.on('ready', () => {
   client.user.setActivity('ping me for help');
 });
 
- 
 
 client.on('message', msg => {
   //ignore bots including self:
@@ -97,43 +139,27 @@ client.on('messageReactionAddCust', async (reaction, user) => {
   const message = reaction.message;
   const starChannel = client.channels.get(star_channel_id);
 
-  message.channel.send(getEmojiString(message));
-
   //don't allow starring bot messages
   if(message.author.bot) return;
 
   //don't allow starring messages in the starboard channel
   if(message.channel.id === star_channel_id) return;
 
-  //only consider these emoji:
-  //(really what I need to check here is if the message already has one of these emoji reacts)
-  if (reaction.emoji.toString() !== '📌' && reaction.emoji.toString() !== '⭐') return;
+  //only continue if the message has the necessary number of stars
+  if(getStarCount(message) < min_emojis) return;
 
   //scan starboard to see if message already exists there
   const fetchedMessages = await starChannel.fetchMessages();
   const alreadyStarredMessage = fetchedMessages.find(m => m.embeds[0] && m.embeds[0].footer && m.embeds[0].footer.text.endsWith(message.id));
+  const embed = buildEmbed(message);
   if(alreadyStarredMessage) {
     message.channel.send(`message is already starred here: ${alreadyStarredMessage.url}`);
-    //maybe edit embed here?
+    //edit the embed
+    if(embed) await alreadyStarredMessage.edit({ embed });
   }
   else {
     //add message to starboard
-    const image = message.attachments.size > 0 ? await getImageAttachment(message.attachments.array()[0].url) : '';
-    // If the message is empty, we don't allow the user to star the message.
-    if (image === '' && message.cleanContent.length < 1) return;
-    const embed = new Discord.RichEmbed()
-      .setColor(15844367)
-      // Here we use cleanContent, which replaces all mentions in the message with their
-      // equivalent text. For example, an @everyone ping will just display as @everyone, without tagging you!
-      // At the date of this edit (09/06/18) embeds do not mention yet.
-      // But nothing is stopping Discord from enabling mentions from embeds in a future update.
-      .setDescription(message.cleanContent) 
-      .setAuthor(message.author.tag, message.author.displayAvatarURL)
-      .addField('Original', `[Jump to Message](${message.url})`)
-      .setFooter(`⭐ 1 | ${message.id}`)
-      .setTimestamp(new Date())
-      .setImage(image);
-    await starChannel.send({ embed });
+    if(embed) await starChannel.send({ embed });
   }
 
     
