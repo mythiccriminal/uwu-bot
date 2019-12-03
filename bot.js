@@ -97,7 +97,7 @@ client.on('messageReactionAddCust', async (reaction, user) => {
       const image = message.attachments.size > 0 ? await this.extension(reaction, message.attachments.array()[0].url) : ''; 
     // If the message is empty, we don't allow the user to star the message.
     if (image === '' && message.cleanContent.length < 1) return;
-    const embed = new RichEmbed()
+    const embed = new Discord.RichEmbed()
       .setColor(15844367)
       // Here we use cleanContent, which replaces all mentions in the message with their
       // equivalent text. For example, an @everyone ping will just display as @everyone, without tagging you!
