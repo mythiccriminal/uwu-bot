@@ -16,7 +16,7 @@ function getImageAttachment(attachment) {
 function getEmojiString(message) {
   let emoji_string = ''
   message.reactions.forEach(reaction => {
-    emoji_string += reaction.emoji.name + ' ' + reaction.emoji.count + ' ';
+    emoji_string += reaction.emoji.name + ' ' + reaction.count + ' ';
   })
   return emoji_string;
 }
