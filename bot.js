@@ -10,6 +10,7 @@ client.on('ready', () => {
 
     console.log('Ready to collect wisdom!');
     client.user.setActivity('ping me for help');
+    starChannel.send('testing channel');
 
 });
 
