@@ -1,3 +1,7 @@
+if (process.argv[0] !== '-h') {
+  var config = require("./config.json");
+}
+
 const Discord = require('discord.js');
 
 const client = new Discord.Client();
@@ -16,9 +20,11 @@ function getImageAttachment(attachment) {
 //return a string representation of the emoji reactions on a message
 function getEmojiString(message) {
   let emoji_string = ''
-  message.reactions.forEach(reaction => {
-    emoji_string += reaction.emoji.toString() + ' ' + reaction.count + '  ';
+  let my_array = message.reactions.map(reaction => {
+    return reaction.emoji.toString() + ' ' + reaction.count;
   })
+
+  emoji_string = my_array.join(' | ');
   return emoji_string;
 }
 
@@ -34,12 +40,44 @@ function getEmojiCount(message) {
 //return the total number of star reactions on a message
 function getStarCount(message) {
   let star_count = 0;
+  
   message.reactions.forEach(reaction => {
     if (reaction.emoji.toString() === '⭐') {// || or pin?
       star_count += reaction.count;
     }
   })
   return star_count;
+}
+
+//returns the message with the most number of reacts in a given timeframe:
+async function bestMessage(guild, days) {
+  var t_best_message;
+  let max_emojis = 0;
+  let date = new Date();
+  date.setDate(date.getDate() - days);
+  let min_snowflake = Discord.SnowflakeUtil.generate(date);
+
+  //get all text channels
+  const channels = await guild.channels.filter(channel => channel.type === 'text');
+  //loop over channels:
+  for (const c of channels) {
+    let channel = c[1];
+
+    //get all messages after the set snowflake
+    let messages = await channel.fetchMessages();//({after : min_snowflake});
+    //loop over messages
+    for (const m of messages) {
+      let message = m[1]
+      let emoji_count = await getEmojiCount(message);
+      
+      if (emoji_count > max_emojis) {
+        max_emojis = emoji_count;
+        t_best_message = message;
+      }
+    }
+  }
+
+  return t_best_message;
 }
 
 //return a RichEmbed object based on the message, or return false if message is empty
@@ -66,13 +104,13 @@ async function buildEmbed(message) {
       },
       {
         name: 'Reacts',
-        value: getEmojiString(message)
+        value: await getEmojiString(message)
       }
     ],
     footer: {
       text: message.id
     },
-    timestamp: new Date(),
+    timestamp: message.createdAt,
     image: {
       url: image
     }
@@ -88,7 +126,7 @@ client.on('ready', () => {
 });
 
 
-client.on('message', msg => {
+client.on('message', async msg => {
   //ignore bots including self:
   if (msg.author.bot) return;
 
@@ -111,6 +149,47 @@ client.on('message', msg => {
     msg.channel.send('This is a starboard bot');
   }
   //other commands go here...
+  else if (command ==='throw'){
+    throw 'bad error';
+  }
+  else if (command === 'best') {
+    //default to day
+    let days = 1;
+    let timespan = 'day';
+    if (args[2]) {
+      timespan = args[2].toLowerCase();
+    }
+
+    if (timespan === 'alltime') {
+      embed_title = `Most reacted post of all time`;
+    }
+    else {
+      embed_title = `Most reacted post of the past ${timespan}`;
+    }
+
+    if (timespan === 'day') {
+      let days = 1;
+    }
+    else if (timespan === 'week') {
+      let days = 7;
+    }
+    else if (timespan === 'month') {
+      let days = 31;
+    }
+    else if (timespan === 'alltime') {
+      let days = 1000;
+    } else {
+      msg.channel.send('unknown option, options are day, week, month, alltime');
+      return;
+    }
+    //find the best message
+    const best_message = await bestMessage(msg.channel.guild, days);
+    const embed = await buildEmbed(best_message);
+    if(embed) {
+      embed.title = embed_title;
+      await msg.channel.send({ embed });
+    }
+  }
   else {
     msg.channel.send('unknown command');
   }
@@ -123,7 +202,6 @@ const events = {
 };
 
 client.on('raw', async event => {
-  //console.log('\nRaw event data:\n', event);
 
   //events I care about have event.t = MESSAGE_REACTION_ADD or MESSAGE_REACTION_REMOVE. ignore everything else.
   if (!(event.t in events)) return;
@@ -153,8 +231,11 @@ client.on('raw', async event => {
 
 client.on('messageReactionAddCust', async (reaction, user) => {
 //                                        (reaction on the message, user who reacted)
-  const message = reaction.message;
+  //was const message = reaction.message
+  //hoping this will fix emoji counts?
+  const message = await reaction.message.channel.fetchMessage(reaction.message.id); 
   const starChannel = client.channels.get(star_channel_id);
+
 
   //don't allow starring bot messages
   if(message.author.bot) return;
@@ -163,16 +244,14 @@ client.on('messageReactionAddCust', async (reaction, user) => {
   if(message.channel.id === star_channel_id) return;
 
   //only continue if the message has the necessary number of stars
-  message.channel.send(`starcount: ${getStarCount(message)}`);
   if(getStarCount(message) < min_emojis) return;
 
   //scan starboard to see if message already exists there
   const fetchedMessages = await starChannel.fetchMessages();
-  const alreadyStarredMessage = fetchedMessages.find(m => m.embeds[0] && m.embeds[0].footer && m.embeds[0].footer.text.endsWith(message.id));
+  const alreadyStarredMessage = await fetchedMessages.find(m => m.embeds[0] && m.embeds[0].footer && m.embeds[0].footer.text.endsWith(message.id));
   const embed = await buildEmbed(message);
-  console.log(embed);
+
   if(alreadyStarredMessage) {
-    message.channel.send(`message is already starred here: ${alreadyStarredMessage.url}`);
     //edit the embed
     if(embed) await alreadyStarredMessage.edit({ embed });
   }
@@ -184,8 +263,39 @@ client.on('messageReactionAddCust', async (reaction, user) => {
     
 });
 
+//exactly the same as messageReactionAddCust, but don't send, only edit emoji field
+client.on('messageReactionRemoveCust', async (reaction, user) => {
+//                                        (reaction on the message, user who reacted)
+  const message = reaction.message;
+  const starChannel = client.channels.get(star_channel_id);
+
+  //don't allow starring bot messages
+  if(message.author.bot) return;
+
+  //don't allow starring messages in the starboard channel
+  if(message.channel.id === star_channel_id) return;
+
+  //only continue if the message has the necessary number of stars
+  if(getStarCount(message) < min_emojis) return;
+
+  //scan starboard to see if message already exists there
+  const fetchedMessages = await starChannel.fetchMessages();
+  const alreadyStarredMessage = await fetchedMessages.find(m => m.embeds[0] && m.embeds[0].footer && m.embeds[0].footer.text.endsWith(message.id));
+  const embed = await buildEmbed(message);
+
+  if(alreadyStarredMessage) {
+    //edit the embed
+    if(embed) await alreadyStarredMessage.edit({ embed });
+  }    
+});
+
  
 
-// THIS  MUST  BE  THIS  WAY
-
-client.login(process.env.BOT_TOKEN);//where BOT_TOKEN is the token of our bot
+if (process.argv[0] === '-h') {
+  //for running with heroku
+  client.login(process.env.BOT_TOKEN);//where BOT_TOKEN is a heroku config variable
+}
+else {
+  //for running locally:
+  client.login(config.token);
+}
