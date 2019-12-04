@@ -1,3 +1,4 @@
+console.log(process.argv[0]);
 if (process.argv[0] !== '-h') {
   var config = require("./config.json");
 }
