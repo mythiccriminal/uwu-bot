@@ -1,10 +1,14 @@
+//to do:
+// make best function work - it looks too far back
+// make it ignore bot messages.
+
 //var config = require("./config.json");
 
 const Discord = require('discord.js');
 
 const client = new Discord.Client();
 const star_channel_id = '651669281196605442';
-const min_emojis = 1;
+const min_emojis = 2;
 
 //check a message attachment. if it's an image, return the attachment, otherwise return ''
 function getImageAttachment(attachment) {
@@ -150,44 +154,45 @@ client.on('message', async msg => {
   else if (command ==='throw'){
     throw 'bad error';
   }
-  else if (command === 'best') {
-    //default to day
-    let days = 1;
-    let timespan = 'day';
-    if (args[2]) {
-      timespan = args[2].toLowerCase();
-    }
+  // this is broken right now!
+  // else if (command === 'best') {
+  //   //default to day
+  //   let days = 1;
+  //   let timespan = 'day';
+  //   if (args[2]) {
+  //     timespan = args[2].toLowerCase();
+  //   }
 
-    if (timespan === 'alltime') {
-      embed_title = `Most reacted post of all time`;
-    }
-    else {
-      embed_title = `Most reacted post of the past ${timespan}`;
-    }
+  //   if (timespan === 'alltime') {
+  //     embed_title = `Most reacted post of all time`;
+  //   }
+  //   else {
+  //     embed_title = `Most reacted post of the past ${timespan}`;
+  //   }
 
-    if (timespan === 'day') {
-      let days = 1;
-    }
-    else if (timespan === 'week') {
-      let days = 7;
-    }
-    else if (timespan === 'month') {
-      let days = 31;
-    }
-    else if (timespan === 'alltime') {
-      let days = 1000;
-    } else {
-      msg.channel.send('unknown option, options are day, week, month, alltime');
-      return;
-    }
-    //find the best message
-    const best_message = await bestMessage(msg.channel.guild, days);
-    const embed = await buildEmbed(best_message);
-    if(embed) {
-      embed.title = embed_title;
-      await msg.channel.send({ embed });
-    }
-  }
+  //   if (timespan === 'day') {
+  //     let days = 1;
+  //   }
+  //   else if (timespan === 'week') {
+  //     let days = 7;
+  //   }
+  //   else if (timespan === 'month') {
+  //     let days = 31;
+  //   }
+  //   else if (timespan === 'alltime') {
+  //     let days = 1000;
+  //   } else {
+  //     msg.channel.send('unknown option, options are day, week, month, alltime');
+  //     return;
+  //   }
+  //   //find the best message
+  //   const best_message = await bestMessage(msg.channel.guild, days);
+  //   const embed = await buildEmbed(best_message);
+  //   if(embed) {
+  //     embed.title = embed_title;
+  //     await msg.channel.send({ embed });
+  //   }
+  // }
   else {
     msg.channel.send('unknown command');
   }
