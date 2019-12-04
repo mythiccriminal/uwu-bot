@@ -3,7 +3,7 @@
 const Discord = require('discord.js');
 
 const client = new Discord.Client();
-const star_channel_id = '651141135141699586';
+const star_channel_id = '651669281196605442';
 const min_emojis = 1;
 
 //check a message attachment. if it's an image, return the attachment, otherwise return ''
