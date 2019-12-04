@@ -1,6 +1,4 @@
-if (process.argv[0] === '-l') {
-  var config = require("./config.json");
-}
+//var config = require("./config.json");
 
 const Discord = require('discord.js');
 
@@ -291,11 +289,9 @@ client.on('messageReactionRemoveCust', async (reaction, user) => {
 
  
 
-if (process.argv[0] === '-l') {
-    //for running locally:
-  client.login(config.token);
-}
-else {
-  //for running with heroku
-  client.login(process.env.BOT_TOKEN);//where BOT_TOKEN is a heroku config variable
-}
+
+//for running locally:
+//client.login(config.token);
+
+//for running with heroku
+client.login(process.env.BOT_TOKEN);//where BOT_TOKEN is a heroku config variable
