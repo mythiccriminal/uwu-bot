@@ -1,5 +1,4 @@
-console.log(process.argv[0]);
-if (process.argv[0] !== '-h') {
+if (process.argv[0] === '-l') {
   var config = require("./config.json");
 }
 
@@ -292,11 +291,11 @@ client.on('messageReactionRemoveCust', async (reaction, user) => {
 
  
 
-if (process.argv[0] === '-h') {
-  //for running with heroku
-  client.login(process.env.BOT_TOKEN);//where BOT_TOKEN is a heroku config variable
+if (process.argv[0] === '-l') {
+    //for running locally:
+  client.login(config.token);
 }
 else {
-  //for running locally:
-  client.login(config.token);
+  //for running with heroku
+  client.login(process.env.BOT_TOKEN);//where BOT_TOKEN is a heroku config variable
 }
